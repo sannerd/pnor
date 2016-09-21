@@ -96,7 +96,11 @@ if (($payload ne "") and ($xz_compression))
 ###
 ### To calculate the pad, ibs=(<partition size>/9)*8
 ###
-run_command("dd if=$op_target_dir/$targeting_binary_source of=$scratch_dir/$targeting_binary_source ibs=4k conv=sync");
+run_command("env echo -en VERSION\\\\0 > $scratch_dir/hostboot_data.sha.bin");
+run_command("sha512sum $op_target_dir/$targeting_binary_source | awk \'{print \$1}\' | xxd -pr -r >> $scratch_dir/hostboot_data.sha.bin");
+run_command("dd if=$scratch_dir/hostboot_data.sha.bin of=$scratch_dir/hostboot.temp.bin ibs=4k conv=sync");
+run_command("cat $op_target_dir/$targeting_binary_source >> $scratch_dir/hostboot.temp.bin");
+run_command("dd if=$scratch_dir/hostboot.temp.bin of=$scratch_dir/$targeting_binary_source ibs=4k conv=sync");
 run_command("ecc --inject $scratch_dir/$targeting_binary_source --output $scratch_dir/$targeting_binary_filename --p8");
 
 run_command("env echo -en VERSION\\\\0 > $scratch_dir/hostboot.sha.bin");
