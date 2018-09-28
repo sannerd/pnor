@@ -6,6 +6,7 @@ use File::Basename;
 #my $ecc_tool_dir = "/opt/mcp/shared/fr_FLD8-1-20140528/opt/fsp/usr/bin"; #wh_todo
 
 my $release = "";
+my $monolithic_payload = 0;
 my $op_target_dir = "";
 my $hb_image_dir = "";
 my $scratch_dir = "";
@@ -46,6 +47,9 @@ while (@ARGV > 0){
     elsif (/^-release/i){
         $release = $ARGV[1] or die "Bad command line arg given: expecting a release (p8 or p9).\n";
         shift;
+    }
+    elsif (/^-monolithic_payload/i){
+        $monolithic_payload = 1;
     }
     elsif (/^-op_target_dir/i){
         $op_target_dir = $ARGV[1] or die "Bad command line arg given: expecting a config type.\n";
@@ -260,8 +264,12 @@ sub processConvergedSections {
     $sections{HBRT}{out}        = "$scratch_dir/hostboot_runtime.header.bin.ecc";
     $sections{OCC}{in}          = "$occ_binary_filename";
     $sections{OCC}{out}         = "$occ_binary_filename.ecc";
-    $sections{BOOTKERNEL}{in}   = "$binary_dir/$bootkernel_filename";
-    $sections{BOOTKERNEL}{out}  = "$scratch_dir/$bootkernel_filename";
+
+    if ($monolithic_payload != 1) {
+        $sections{BOOTKERNEL}{in}   = "$binary_dir/$bootkernel_filename";
+        $sections{BOOTKERNEL}{out}  = "$scratch_dir/$bootkernel_filename";
+    }
+
     $sections{CAPP}{in}         = "$capp_binary_filename";
     $sections{CAPP}{out}        = "$scratch_dir/cappucode.bin.ecc";
     $sections{CVPD}{in}         = "$hb_binary_dir/cvpd.bin";

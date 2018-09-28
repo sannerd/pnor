@@ -5,6 +5,7 @@ use File::Basename;
 
 my $program_name = File::Basename::basename $0;
 my $release = "";
+my $monolithic_payload = 0;
 my $outdir = "";
 my $scratch_dir = "";
 my $pnor_data_dir = "";
@@ -35,6 +36,9 @@ while (@ARGV > 0){
     elsif (/^-release/i){
         $release = $ARGV[1] or die "Bad command line arg given: expecting a release input.\n";
         shift;
+    }
+    elsif (/^-monolithic_payload/i){
+        $monolithic_payload = 1;
     }
     elsif (/^-scratch_dir/i){
         $scratch_dir = $ARGV[1] or die "Bad command line arg given: expecting a scratch dir path.\n";
@@ -133,7 +137,6 @@ $build_pnor_command .= " --binFile_HBRT $scratch_dir/hostboot_runtime.header.bin
 $build_pnor_command .= " --binFile_HBEL $scratch_dir/hbel.bin.ecc";
 $build_pnor_command .= " --binFile_GUARD $scratch_dir/guard.bin.ecc";
 $build_pnor_command .= " --binFile_PAYLOAD $payload";
-$build_pnor_command .= " --binFile_BOOTKERNEL $bootkernel";
 $build_pnor_command .= " --binFile_NVRAM $scratch_dir/nvram.bin";
 $build_pnor_command .= " --binFile_MVPD $scratch_dir/mvpd_fill.bin.ecc";
 $build_pnor_command .= " --binFile_DJVPD $scratch_dir/djvpd_fill.bin.ecc";
@@ -162,6 +165,11 @@ if ($release eq "p8"){
     $build_pnor_command .= " --binFile_RINGOVD $scratch_dir/ringOvd.bin";
     $build_pnor_command .= " --binFile_HB_VOLATILE $scratch_dir/guard.bin.ecc";
 }
+
+if ($monolithic_payload != 1) {
+    $build_pnor_command .= " --binFile_BOOTKERNEL $bootkernel";
+}
+
 $build_pnor_command .= " --fpartCmd \"fpart\"";
 $build_pnor_command .= " --fcpCmd \"fcp\"";
 print "###############################";
